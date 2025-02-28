@@ -6,8 +6,6 @@ import aiofiles
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi_pagination import Page, add_pagination, paginate
-# from fastapi_pagination.ext.sqlalchemy import paginate
-
 from sqlalchemy import select, insert, or_, and_, delete
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -44,6 +42,7 @@ async def get_all_rent(
         return paginate(rent_data)
     except Exception as e:
         raise HTTPException(status_code=401, detail="Not authenticated")
+
 
 add_pagination(mobile_router)
 
@@ -171,9 +170,9 @@ async def get_rents_review(
 
 @mobile_router.post('/add-wishlist')
 async def add_wishlist(
-    rent_id: int,
-    token: dict = Depends(verify_token),
-    session: AsyncSession = Depends(get_async_session)
+        rent_id: int,
+        token: dict = Depends(verify_token),
+        session: AsyncSession = Depends(get_async_session)
 ):
     user_id = token['user_id']
     wishlist_data = await session.execute(
@@ -182,7 +181,7 @@ async def add_wishlist(
         ))
     wish_data = wishlist_data.scalars().one_or_none()
     if wish_data:
-        await session.execute(delete(Wishlist).where(and_(Wishlist.rent_id==rent_id, Wishlist.user_id==user_id)))
+        await session.execute(delete(Wishlist).where(and_(Wishlist.rent_id == rent_id, Wishlist.user_id == user_id)))
     else:
         await session.execute(insert(Wishlist).values(user_id=user_id, rent_id=rent_id))
     await session.commit()
@@ -214,22 +213,19 @@ async def get_all_rents(
         selectinload(Rent.jins),
         selectinload(Rent.category),
         selectinload(Rent.renter)
-    ).where(and_(Rent.student_jins_id == gender, or_(Rent.name.ilike(search_query), Rent.description.ilike(search_query))))
+    ).where(
+        and_(Rent.student_jins_id == gender, or_(Rent.name.ilike(search_query), Rent.description.ilike(search_query))))
     data = await session.execute(query_data)
     return paginate(data.scalars().all())
+
 
 add_pagination(mobile_router)
 
 
-@mobile_router.get('/add-announcement')
+@mobile_router.post('/add-announcement')
 async def add_announcement(
         data: AnnouncementPOSTScheme,
         token: dict = Depends(verify_token),
         session: AsyncSession = Depends(get_async_session)
 ):
     user_id = token['user_id']
-
-
-
-
-

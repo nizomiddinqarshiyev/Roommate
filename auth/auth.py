@@ -1,14 +1,12 @@
 import secrets
 from datetime import date, datetime
 from typing import List
-
 import aiofiles
 from fastapi import APIRouter, HTTPException, UploadFile, Depends
 from sqlalchemy import select, insert, update
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from passlib.context import CryptContext
-
 from database import get_async_session
 from .scheme import User_Phone, UserLogin, UserData_2, University_list, faculty_list, district_list, region_list, \
     UserData_info, RenterData, RenterData_info, change_password
@@ -19,10 +17,10 @@ auth_router = APIRouter()
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
-user_data = {}  # Initialize user_data dictionary
+user_data = {}
 
 
-@auth_router.post('/phone_number/')
+@auth_router.post('/phone_number/',tags=["student"], summary="Phone number ask")
 async def phone_number(user_phone: User_Phone, session: AsyncSession = Depends(get_async_session)):
     try:
         query_phone = select(User).where(User.phone == user_phone.phone)
@@ -36,7 +34,6 @@ async def phone_number(user_phone: User_Phone, session: AsyncSession = Depends(g
             user_data['phone'] = user_phone.phone
             print(user_data)
             return HTTPException(status_code=200, detail="Message sent!")
-
     except Exception as e:
         return HTTPException(status_code=500, detail=f"{e}")
 
