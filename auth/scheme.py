@@ -61,12 +61,28 @@ class faculty_list(BaseModel):
 
 class region_list(BaseModel):
     id: int
-    name: str
+    name_uz: str
+    name_ru: str
 
 class district_list(BaseModel):
     id: int
-    name: str
+    name_uz: str
+    name_ru: str
     region_id:int
+
+
+class district_list_admin(BaseModel):
+    id: int
+    name_uz: str
+    name_ru: str
+    region_id:region_list
+
+
+class district_list_admin(BaseModel):
+    id:int
+    district_id:district_list_admin
+    name_uz:str
+    name_ru:str
 
 class change_password(BaseModel):
     old_password: str
